@@ -1,0 +1,48 @@
+html,
+body {
+    height: 100%;
+}
+
+.ar-main{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.ar-content{
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0px;
+}
+
+.w3-sidenav a:hover, .w3-sidenav a:focus{
+    background: #388E3C  !important;
+}
+
+.w3-sidenav i.w3-closenav{
+    padding: 16px;
+}
+
+.ar-playpause {
+    position: absolute !important;
+    bottom: 29px;
+    right: 10px;
+}
+
+.ar-playpause i {
+    position: relative;
+    top: 2px;
+}
+
+.ar-song img{
+    margin: 6px 0px;
+}
+
+.ar-fav{
+    position: relative;
+    top: 5px;
+}
+
+.ar-title{
+    margin: 2px 4px 0px 4px !important
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Radio Österreich</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3-theme-green.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script>
+        var app = angular.module('radio', []);
+    </script>
+    <script src="js/songService.js"></script>
+    <script src="js/radio.js"></script>
+</head>
+<body ng-app="radio" ng-controller="main">
+
+<nav class="w3-sidenav w3-theme-d1 w3-card-2" style="display:none">
+    <i href="javascript:void(0)"
+       onclick="w3_close()"
+       class="w3-closenav material-icons w3-xlarge">menu</i>
+    <h3><a ng-click="switchView(0)" href="#">Live</a></h3>
+    <h3><a ng-click="switchView(1)" href="#">History</a></h3>
+    <hr>
+    <h3 ng-repeat="st in stations"><a ng-click="switchStation(st.id)" href="#">{{st.name}}</a></h3>
+    <hr>
+    <h3><a ng-click="switchView(2)" href="#">Favoriten</a></h3>
+</nav>
+
+<div class="ar-main">
+
+    <header class="ar-header w3-xlarge w3-theme">
+        <h2><i class="w3-margin-left w3-opennav material-icons" onclick="w3_open()">menu</i> {{title}}</h2>
+    </header>
+
+    <!-- Live View /-->
+    <div ng-show="view == 0" class="ar-content w3-container w3-padding-16">
+        <div ng-repeat="s in livePlaylist" class="w3-row ar-song">
+            <div class="w3-col" style="width:80px">
+                <img ng-src="{{s.cover}}" width="80"/>
+            </div>
+            <div class="w3-rest w3-container">
+                <h5 class="ar-title">{{s.title}}</h5>
+                <span class="w3-margin-4">{{s.artist}}</span><br>
+                <span class="w3-margin-4 w3-tag w3-theme-d1">{{s.time | date:"HH:mm"}}</span>
+                <span ng-show="s.isPlaying" class="w3-margin-4 w3-tag w3-theme-d3">Jetzt</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- History View /-->
+    <div ng-show="view == 1" class="ar-content w3-container w3-padding-16">
+
+        <input type="datetime-local" ng-model="historyDate" ng-change="loadHistory()" class="ar-datepicker"/>
+
+        <div ng-repeat="s in history" class="w3-row ar-song">
+            <div class="w3-col" style="width:80px">
+                <img ng-src="{{s.cover}}" width="80"/>
+            </div>
+            <div class="w3-rest w3-container">
+                <h5 class="ar-title">{{s.title}}</h5>
+                <span class="w3-margin-4">{{s.artist}}</span><br>
+                <span class="w3-margin-4 w3-tag w3-theme-d1">{{s.time | date:"HH:mm"}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites /-->
+    <div ng-show="view == 2" class="ar-content w3-container w3-padding-16">
+        <div ng-repeat="s in favorites" class="w3-row ar-song">
+            <div class="w3-col" style="width:80px">
+                <img ng-src="{{s.cover}}" width="80"/>
+            </div>
+            <div class="w3-rest w3-container">
+                <h5 class="ar-title">{{s.title}}</h5>
+                <span class="w3-margin-4">{{s.artist}}</span><br>
+                <span class="w3-margin-4 w3-tag w3-theme-d1">{{s.time | date:"HH:mm"}}</span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="ar-footer w3-padding-8 w3-container w3-theme w2-card-2">
+        <h3 style="display: inline;">{{currentShow.name}}</h3>
+        <h4 style="display: inline;">{{currentShow.host}}</h4>
+
+        <a class="ar-playpause w3-btn-floating-large w3-theme-d4" ng-click="playPause()"><i class="material-icons">{{isPlaying==true?"pause":"play_arrow"}}</i></a>
+
+    </footer>
+
+    <audio class="audioplayer"></audio>
+
+</div>
+
+<script>
+    function w3_open() {
+        document.getElementsByClassName("w3-sidenav")[0].style.display = "block";
+    }
+    function w3_close() {
+        document.getElementsByClassName("w3-sidenav")[0].style.display = "none";
+    }
+
+    function audio_play(){
+        document.getElementsByClassName("audioplayer")[0].play();
+    }
+
+    function audio_pause(){
+        document.getElementsByClassName("audioplayer")[0].pause();
+    }
+
+    function audio_set_src(source){
+        document.getElementsByClassName("audioplayer")[0].src=source;
+        audio_play();
+    }
+
+</script>
+
+</body>
+</html>
