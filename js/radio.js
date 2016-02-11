@@ -2,7 +2,7 @@
  * Created by Niklas on 07.02.2016.
  */
 
-app.controller('main', function($scope, $songService) {
+app.controller('main', function($scope, $songService,$interval,$storageService) {
     //static data
     $scope.stations = [
         {
@@ -24,7 +24,7 @@ app.controller('main', function($scope, $songService) {
 
     $scope.viewNames=[
         "Live",
-        "History",
+        "Suche",
         "Favoriten"
     ]
 
@@ -47,6 +47,9 @@ app.controller('main', function($scope, $songService) {
                 $scope.currentStation=st;
             }
         }
+        $scope.livePlaylist = [];
+        $scope.currentShow = {};
+        $scope.history = [];
         $scope.updateViewAndShow();
         $scope.title = $scope.getTitle();
         audio_set_src($scope.currentStation.streamUrl)
@@ -61,7 +64,7 @@ app.controller('main', function($scope, $songService) {
     }
 
     $scope.updateViewAndShow = function(){
-        $songService.station=$scope.currentStation.id;
+        $songService.setStation($scope.currentStation.id);
         switch($scope.view){
             case 0:
                 $scope.loadLivePlaylist();
@@ -89,9 +92,10 @@ app.controller('main', function($scope, $songService) {
         $songService.getCurrentPlaylist(
             function(songs){
                 $scope.livePlaylist=songs;
+                $scope.checkFavorites(songs);
             },
             function(){
-                //TODO: Show something here
+                $scope.livePlaylist=[];
             }
         );
     };
@@ -100,15 +104,16 @@ app.controller('main', function($scope, $songService) {
         $songService.getHistory($scope.historyDate,
             function(history){
                 $scope.history=history;
+                $scope.checkFavorites(history);
             },
             function(){
-                //TODO: Show something here
+                $scope.history=[];
             }
         );
     }
 
     $scope.loadFavorites= function(){
-
+        $scope.favorites=$storageService.getFavoriteSongs();
     }
 
     $scope.loadShow = function(){
@@ -117,7 +122,7 @@ app.controller('main', function($scope, $songService) {
                 $scope.currentShow=show;
             },
             function(){
-                //TODO: Show something here
+                $scope.currentShow={};
             }
         );
     }
@@ -133,11 +138,37 @@ app.controller('main', function($scope, $songService) {
         }
     }
 
+    $scope.periodicUpdate = function(){
+        $interval(function () {
+            $scope.loadLivePlaylist();
+            $scope.loadShow();
+        }, 15000);
+    }
+
+    $scope.checkFavorites = function(songList){
+        for(var i=0;i<songList.length;i++){
+            var s = songList[i];
+            s.isFavorite = $storageService.isSongFavorite(s);
+        }
+    }
+
+    $scope.addToFavs = function(song){
+        song.isFavorite=true;
+        $storageService.storeSong(song);
+        $scope.loadFavorites();
+    }
+
+    $scope.removeFromFavs = function(song){
+        $storageService.removeSong(song);
+        $scope.loadFavorites();
+    }
 
     $scope.ctor = function(){
         $scope.switchStation($scope.stations[0].id);
         $scope.title=$scope.getTitle();
         $scope.updateViewAndShow();
+        $scope.periodicUpdate();
+        $scope.historyDate.setSeconds(0,0);
     }
 
     $scope.ctor();

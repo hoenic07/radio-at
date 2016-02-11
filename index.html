@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Radio Österreich</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Radio Mobile AT</title>
     <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
     <link rel="stylesheet" href="http://www.w3schools.com/lib/w3-theme-green.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
     <script>
         var app = angular.module('radio', []);
     </script>
     <script src="js/songService.js"></script>
+    <script src="js/storageService.js"></script>
     <script src="js/radio.js"></script>
 </head>
 <body ng-app="radio" ng-controller="main">
@@ -21,7 +22,7 @@
        onclick="w3_close()"
        class="w3-closenav material-icons w3-xlarge">menu</i>
     <h3><a ng-click="switchView(0)" href="#">Live</a></h3>
-    <h3><a ng-click="switchView(1)" href="#">History</a></h3>
+    <h3><a ng-click="switchView(1)" href="#">Hit Suche</a></h3>
     <hr>
     <h3 ng-repeat="st in stations"><a ng-click="switchStation(st.id)" href="#">{{st.name}}</a></h3>
     <hr>
@@ -36,6 +37,11 @@
 
     <!-- Live View /-->
     <div ng-show="view == 0" class="ar-content w3-container w3-padding-16">
+
+        <div ng-show="livePlaylist == null || livePlaylist.length == 0">
+            (Noch) keine Daten vorhanden...
+        </div>
+
         <div ng-repeat="s in livePlaylist" class="w3-row ar-song">
             <div class="w3-col" style="width:80px">
                 <img ng-src="{{s.cover}}" width="80"/>
@@ -45,6 +51,7 @@
                 <span class="w3-margin-4">{{s.artist}}</span><br>
                 <span class="w3-margin-4 w3-tag w3-theme-d1">{{s.time | date:"HH:mm"}}</span>
                 <span ng-show="s.isPlaying" class="w3-margin-4 w3-tag w3-theme-d3">Jetzt</span>
+                <span ng-show="!s.isFavorite" class="ar-fav-button w3-margin-4 w3-badge w3-red" ng-click="addToFavs(s)">&hearts;</span>
             </div>
         </div>
     </div>
@@ -52,7 +59,11 @@
     <!-- History View /-->
     <div ng-show="view == 1" class="ar-content w3-container w3-padding-16">
 
-        <input type="datetime-local" ng-model="historyDate" ng-change="loadHistory()" class="ar-datepicker"/>
+        <input type="datetime-local" ng-model="historyDate" ng-change="loadHistory()" class="ar-historydatechooser"/>
+
+        <div ng-show="history == null || history.length == 0">
+            (Noch) keine Daten vorhanden...
+        </div>
 
         <div ng-repeat="s in history" class="w3-row ar-song">
             <div class="w3-col" style="width:80px">
@@ -68,6 +79,11 @@
 
     <!-- Favorites /-->
     <div ng-show="view == 2" class="ar-content w3-container w3-padding-16">
+
+        <div ng-show="favorites == null || favorites.length == 0">
+            Klicke &hearts; um einen Song zu den Favoriten zu adden.
+        </div>
+
         <div ng-repeat="s in favorites" class="w3-row ar-song">
             <div class="w3-col" style="width:80px">
                 <img ng-src="{{s.cover}}" width="80"/>
@@ -75,7 +91,7 @@
             <div class="w3-rest w3-container">
                 <h5 class="ar-title">{{s.title}}</h5>
                 <span class="w3-margin-4">{{s.artist}}</span><br>
-                <span class="w3-margin-4 w3-tag w3-theme-d1">{{s.time | date:"HH:mm"}}</span>
+                <span class="ar-fav-button w3-margin-4 w3-badge w3-red" ng-click="removeFromFavs(s)">X</span>
             </div>
         </div>
     </div>
